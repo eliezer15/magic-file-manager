@@ -1,6 +1,9 @@
 const express = require('express');
 const router = express.Router();
+
 const s3Service = require('../services/S3Service');
+const dynamoDbService = require('../services/DynamoDBService');
+const idGenerator = require('../services/IdGenerator');
 
 router.get('/api/files', (req, res) => {
   return res.status(200).send('You did it!');
@@ -13,17 +16,38 @@ router.post('/api/files', (req, res) => {
       message: 'No file received'
     });
   }
+  
+  const file = req.files.file;
 
-  const uploadedFile = req.files.file;
-  s3Service.uploadFile(uploadedFile, (err, data) => {
+  const fileInfo = {
+    id: idGenerator.generateRandomId(),
+    filename: file.name,
+    byteSize: file.data.byteLength,
+    dateUploaded: new Date().toISOString()
+  };
+
+  s3Service.uploadFile(fileInfo.id, file.data, (err) => {
     if (err) {
       console.log(err);
       return res.status(500).json({
         status: 'InternalServerError',
         message: 'Error uploading file!'
       });
-    } else {
-      return res.json(data);
+    } 
+    else {
+
+      dynamoDbService.putFile(fileInfo, (err) => {
+        if (err) {
+          console.log(err);
+          return res.status(500).json({
+            status: 'InternalServerError',
+            message: 'Error uploading file!'
+          });
+        }
+        else {
+          return res.json(fileInfo);
+        }
+      });
     }
   })
 });

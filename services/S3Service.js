@@ -1,6 +1,8 @@
 const AWS = require('aws-sdk');
+AWS.config.loadFromPath('config/aws.json');
+
 const s3 = new AWS.S3();
-const config = require('../config');
+const config = require('../config/config');
 
 /**
  * S3 Service, abstracts the communication with S3
@@ -12,11 +14,11 @@ module.exports = {
    * @param {*} file
    * @param {function} callback 
    */
-  uploadFile: function(file, callback) {
+  uploadFile: function(id, fileData, callback) {
     const uploadParams = {
       Bucket: config.BucketName,
-      Key: file.name,
-      Body: file.data
+      Key: id,
+      Body: fileData
     };
 
     s3.putObject(uploadParams, callback);
