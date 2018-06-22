@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const s3Service = require('../services/S3Service');
 
 router.get('/api/files', (req, res) => {
   return res.status(200).send('You did it!');
@@ -14,21 +15,17 @@ router.post('/api/files', (req, res) => {
   }
 
   const uploadedFile = req.files.file;
-  uploadedFile.mv(`${uploadedFile.name}`, (err) => {
+  s3Service.uploadFile(uploadedFile, (err, data) => {
     if (err) {
       console.log(err);
       return res.status(500).json({
         status: 'InternalServerError',
-        message: 'Error uploading file'
+        message: 'Error uploading file!'
       });
+    } else {
+      return res.json(data);
     }
-
-    return res.json({
-      id: '123',
-      fileName: uploadedFile.name,
-      fileSizeInBytes: 50,
-    });
-  });
+  })
 });
 
 module.exports = router;
