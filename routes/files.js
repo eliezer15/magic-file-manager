@@ -5,6 +5,41 @@ const s3Service = require('../services/S3Service');
 const dynamoDbService = require('../services/DynamoDBService');
 const idGenerator = require('../services/IdGenerator');
 
+router.get('/api/files', async(req, res) => {
+  try {
+    const files = await dynamoDbService.getAllFileItems();
+    return res.json(files);
+  }
+  catch(err) {
+    console.log(err);
+    return res.status(500).json({
+      status: 'InternalServerError',
+      message: 'An unexpected error occured'
+    });
+  }
+});
+
+router.get('/api/files/:fileId', async (req, res) => {
+  try {
+    const fileInfo = await dynamoDbService.getFileItem(req.params.fileId);
+    if (fileInfo) {
+      res.json(fileInfo)
+    }
+    else {
+      return res.status(404).send({
+        status: 'NotFound',
+        message: 'File not found'
+      });
+    }
+  }
+  catch(err) {
+    console.log(err);
+    return res.status(500).json({
+      status: 'InternalServerError',
+      message: 'An unexpected error occured'
+    });
+  }
+});
 
 router.get('/api/files/:fileId/download', async (req, res) => {
   try {

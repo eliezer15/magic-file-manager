@@ -4,6 +4,14 @@ AWS.config.loadFromPath('config/aws.json');
 const dynamoDb = new AWS.DynamoDB();
 const config = require('../config/config');
 
+function itemToFileInfo(dynamoItem) {
+  return {
+    Id: dynamoItem.Id.S,
+    Filename: dynamoItem.Filename.S,
+    ByteSize: dynamoItem.ByteSize.N,
+    DateUploaded: new Date(dynamoItem.DateUploaded.S)
+  };
+}
 
 module.exports = {
 
@@ -62,18 +70,29 @@ module.exports = {
           reject(err);
         }
         else if (resp.Item) {
-          const fileInfo = {
-            Id: resp.Item.Id.S,
-            Filename: resp.Item.Filename.S,
-            ByteSize: resp.Item.ByteSize.N,
-            DateUploaded: new Date(resp.Item.DateUploaded.S)
-          };
-          resolve(fileInfo);
+          resolve(itemToFileInfo(resp.Item));
         }
         else {
         resolve(undefined);
         }
       });
     });
-  }
+  },
+
+  getAllFileItems: function() {
+    const params = {
+      TableName: config.TableName
+    };
+
+    return new Promise((resolve, reject) => {
+      dynamoDb.scan(params, (err, data) => {
+        if (err) {
+          reject(err);
+        }
+        else {
+          resolve(data.Items.map(itemToFileInfo));
+        }
+      });
+    });
+  },
 };
