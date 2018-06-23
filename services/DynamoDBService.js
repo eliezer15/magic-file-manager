@@ -4,8 +4,13 @@ AWS.config.loadFromPath('config/aws.json');
 const dynamoDb = new AWS.DynamoDB();
 const config = require('../config/config');
 
+
 module.exports = {
-  putFile: function(fileInfo, callback) {
+
+  /**
+   * 
+   */
+  putFileItem: function(fileInfo, callback) {
     const params = {
       Item: {
         'Id': {
@@ -24,8 +29,19 @@ module.exports = {
       TableName: config.TableName
     };
 
-    console.log(params);
-
     dynamoDb.putItem(params, callback);
+  },
+
+  getFileItem(id, callback) {
+    const params = {
+      Key: {
+        'Id': {
+          'S': id
+        }
+      },
+      TableName: config.TableName
+    };
+
+    dynamoDb.getItem(params, callback);
   }
 }

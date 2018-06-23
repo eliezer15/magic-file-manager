@@ -22,5 +22,14 @@ module.exports = {
     };
 
     s3.putObject(uploadParams, callback);
+  },
+
+  downloadFile: function(id, callback) {
+    const params = {
+      Key: id,
+      Bucket: config.BucketName
+    };
+
+    s3.getObject(params, callback);
   }
 }

@@ -5,8 +5,25 @@ const s3Service = require('../services/S3Service');
 const dynamoDbService = require('../services/DynamoDBService');
 const idGenerator = require('../services/IdGenerator');
 
-router.get('/api/files', (req, res) => {
-  return res.status(200).send('You did it!');
+router.get('/api/files/:fileId', (req, res) => {
+
+  dynamoDbService.getFileItem(req.params.fileId, (err, result) => {
+    if (err) {
+      return res.status(500).send(err);
+    }
+    console.log('result');
+    console.log(result);
+    const fileInfo = result.Item;
+
+    s3Service.downloadFile(fileInfo.Id.S, (err, data) => {
+      if (err) {
+        console.log(err);
+        return res.status(500).send('Error');
+      }
+      res.set('Content-Disposition', `attachment; filename=${fileInfo.Filename.S}`);
+      res.send(data.Body);
+    });
+  });
 });
 
 router.post('/api/files', (req, res) => {
@@ -20,13 +37,13 @@ router.post('/api/files', (req, res) => {
   const file = req.files.file;
 
   const fileInfo = {
-    id: idGenerator.generateRandomId(),
-    filename: file.name,
-    byteSize: file.data.byteLength,
-    dateUploaded: new Date().toISOString()
+    Id: idGenerator.generateRandomId(),
+    Filename: file.name,
+    ByteSize: file.data.byteLength,
+    DateUploaded: new Date().toISOString()
   };
 
-  s3Service.uploadFile(fileInfo.id, file.data, (err) => {
+  s3Service.uploadFile(fileInfo.Id, file.data, (err) => {
     if (err) {
       console.log(err);
       return res.status(500).json({
@@ -36,7 +53,7 @@ router.post('/api/files', (req, res) => {
     } 
     else {
 
-      dynamoDbService.putFile(fileInfo, (err) => {
+      dynamoDbService.putFileItem(fileInfo, (err) => {
         if (err) {
           console.log(err);
           return res.status(500).json({
