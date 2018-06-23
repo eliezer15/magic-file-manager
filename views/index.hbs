@@ -1,5 +1,42 @@
-<form id="uploadForm" enctype="multipart/form-data">
-    <input type="file" name="file" id="file"/>
-    <input type="button" id="upload" value="Upload File" />
+<h2 class="title is-2">Magic File Uploader</h2>
+<h4 class="title is-4" id="subtitle">Upload File</h4>
+<form id="upload-form" enctype="multipart/form-data">
+  <div class="field is-grouped is-grouped-centered">
+    <div class="control">
+      <div class="file has-name">
+        <label class="file-label">
+          <input class="file-input" id="file" type="file" name="file">
+            <span class="file-cta">
+            <span class="file-icon">
+              <i class="fas fa-upload"></i>
+            </span>
+            <span class="file-label">
+              Choose a file…
+            </span>
+            </span>
+            <span class="file-name">
+            </span>
+        </label>
+      </div>
+    </div>
+    <div class="control">
+      <button class="button is-link" id="upload">Upload</button>
+    </div>
+  </div>
+  <p class="help is-danger" id="form-message"></p>
 </form>
-<span id="result"></span> 
+
+<div class="section" id="file-list">
+  <p class="help is-danger" id="table-message"></p>
+  <table class="table is-hoverable">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Size (bytes)</th>
+        <th>Uploaded</th>
+      </tr>
+    </thead>
+    <tbody>
+    </tbody>
+  </table>
+</div>

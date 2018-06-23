@@ -1,8 +1,7 @@
-body {
-  padding: 50px;
-  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+#subtitle {
+    margin-bottom: 10px;
 }
 
-a {
-  color: #00B7FF;
+table {
+    margin: 0 auto;
 }
