@@ -14,11 +14,11 @@ $(() => {
   $('#upload').click(function(e) {
     e.preventDefault();
 
-    var message = $('#form-message');
+    var formErrorMessage = $('#form-message');
 
     var files = $('#file')[0].files;
     if (files.length < 1) {
-      setErrorMessage(message, 'No files selected');
+      setErrorMessage(formErrorMessage, 'No files selected');
       return;
     }
 
@@ -37,11 +37,12 @@ $(() => {
       processData: false
     })
     .done((file) => {
-      setSuccessMessage(message, 'File uploaded successfully');
+      setSuccessMessage(formErrorMessage, 'File uploaded successfully');
       $('tbody').append(generateFileRowHtml(file));
     })
-    .fail(() => {
-      setErrorMessage(message, 'Error uploading file');
+    .fail((jqXHR) => {
+      var errorMessage = jqXHR.status === 413 ? 'File is too large!' : 'Error uploading file';
+      setErrorMessage(formErrorMessage, errorMessage);
     })
     .always(() => {
       $(this).removeClass('is-loading');
