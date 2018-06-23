@@ -8,31 +8,45 @@ const config = require('../config/config');
 module.exports = {
 
   /**
-   * 
+   * Save a File Item to the Table
+   * @param {object} fileInfo
    */
-  putFileItem: function(fileInfo, callback) {
+  putFileItem: function(fileInfo) {
     const params = {
       Item: {
         'Id': {
-          'S': fileInfo.id 
+          'S': fileInfo.Id 
         },
         'Filename': {
-          'S': fileInfo.filename
+          'S': fileInfo.Filename
         },
         'ByteSize': {
-          'N': fileInfo.byteSize.toString()
+          'N': fileInfo.ByteSize.toString()
         },
         'DateUploaded': {
-          'S': fileInfo.dateUploaded
+          'S': fileInfo.DateUploaded
         }
       },
       TableName: config.TableName
     };
 
-    dynamoDb.putItem(params, callback);
+    return new Promise((resolve, reject) => {
+      dynamoDb.putItem(params, (err, resp) => {
+        if (err) {
+          reject(err);
+        }
+        else {
+          resolve(resp);
+        }
+      });
+    });
   },
 
-  getFileItem(id, callback) {
+  /**
+   * Get File Item by Id, returns empty object if not found
+   * @param {*} id 
+   */
+  getFileItem: function(id) {
     const params = {
       Key: {
         'Id': {
@@ -42,6 +56,24 @@ module.exports = {
       TableName: config.TableName
     };
 
-    dynamoDb.getItem(params, callback);
+    return new Promise((resolve, reject) => {
+      dynamoDb.getItem(params, (err, resp) => {
+        if (err) {
+          reject(err);
+        }
+        else if (resp.Item) {
+          const fileInfo = {
+            Id: resp.Item.Id.S,
+            Filename: resp.Item.Filename.S,
+            ByteSize: resp.Item.ByteSize.N,
+            DateUploaded: new Date(resp.Item.DateUploaded.S)
+          };
+          resolve(fileInfo);
+        }
+        else {
+        resolve(undefined);
+        }
+      });
+    });
   }
-}
+};

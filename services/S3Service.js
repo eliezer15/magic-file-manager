@@ -11,25 +11,48 @@ module.exports = {
 
   /**
    * Upload File to pre-configured bucket
-   * @param {*} file
+   * @param {string} id
+   * @param {buffer} fileData
    * @param {function} callback 
    */
-  uploadFile: function(id, fileData, callback) {
+  uploadFile: function(id, fileData) {
     const uploadParams = {
       Bucket: config.BucketName,
       Key: id,
       Body: fileData
     };
 
-    s3.putObject(uploadParams, callback);
+    return new Promise((resolve, reject) => {
+      s3.putObject(uploadParams, async (err, resp) => {
+        if (err) {
+          reject(err);
+        }
+        else {
+          resolve(resp);
+        }
+      });
+    });
   },
 
-  downloadFile: function(id, callback) {
+  /**
+   * Download File by Id
+   * @param {string} id
+   */
+  downloadFile: function(id) {
     const params = {
       Key: id,
       Bucket: config.BucketName
     };
 
-    s3.getObject(params, callback);
+    return new Promise((resolve, reject) => {
+      s3.getObject(params, (err, resp) => {
+        if (err) {
+          reject(err);
+        }
+        else {
+          resolve(resp);
+        }
+      });
+    });
   }
-}
+};

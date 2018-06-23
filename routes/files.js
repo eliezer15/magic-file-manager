@@ -5,28 +5,33 @@ const s3Service = require('../services/S3Service');
 const dynamoDbService = require('../services/DynamoDBService');
 const idGenerator = require('../services/IdGenerator');
 
-router.get('/api/files/:fileId', (req, res) => {
 
-  dynamoDbService.getFileItem(req.params.fileId, (err, result) => {
-    if (err) {
-      return res.status(500).send(err);
+router.get('/api/files/:fileId/download', async (req, res) => {
+  try {
+    const fileInfo = await dynamoDbService.getFileItem(req.params.fileId);
+    if (fileInfo) {
+      const fileData = await s3Service.downloadFile(fileInfo.Id);
+      res.set('Content-Disposition', `attachment; filename=${fileInfo.Filename}`);
+      res.send(fileData.Body);
     }
-    console.log('result');
-    console.log(result);
-    const fileInfo = result.Item;
-
-    s3Service.downloadFile(fileInfo.Id.S, (err, data) => {
-      if (err) {
-        console.log(err);
-        return res.status(500).send('Error');
-      }
-      res.set('Content-Disposition', `attachment; filename=${fileInfo.Filename.S}`);
-      res.send(data.Body);
+    else {
+      return res.status(404).send({
+        status: 'NotFound',
+        message: 'File not found'
+      });
+    }
+  }
+  catch(err) {
+    console.log(err);
+    return res.status(500).json({
+      status: 'InternalServerError',
+      message: 'An unexpected error occured'
     });
-  });
+  }
 });
 
-router.post('/api/files', (req, res) => {
+router.post('/api/files', async (req, res) => {
+
   if (!req.files) {
     return res.status(400).json({
       status: 'BadRequest',
@@ -43,30 +48,18 @@ router.post('/api/files', (req, res) => {
     DateUploaded: new Date().toISOString()
   };
 
-  s3Service.uploadFile(fileInfo.Id, file.data, (err) => {
-    if (err) {
-      console.log(err);
-      return res.status(500).json({
-        status: 'InternalServerError',
-        message: 'Error uploading file!'
-      });
-    } 
-    else {
-
-      dynamoDbService.putFileItem(fileInfo, (err) => {
-        if (err) {
-          console.log(err);
-          return res.status(500).json({
-            status: 'InternalServerError',
-            message: 'Error uploading file!'
-          });
-        }
-        else {
-          return res.json(fileInfo);
-        }
-      });
-    }
-  })
+  try {
+    await s3Service.uploadFile(fileInfo.Id, file.data);
+    await dynamoDbService.putFileItem(fileInfo);
+    return res.json(fileInfo);
+  }
+  catch(err) {
+    console.log(err);
+    return res.status(500).json({
+      status: 'InternalServerError',
+      message: 'An unexpected error occured'
+    });
+  }
 });
 
 module.exports = router;
