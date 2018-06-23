@@ -13,6 +13,8 @@ The application has the following endpoints:
 #### Assumptions made
 Decided to support the upload of duplicate files, which are considered different objects with different identifiers by the system.
 
+The app supports requests of up to 100MB in size, thus the size of a file to upload is limited.
+
 ### Additional Requirements chosen
 * Endpoint to return list of all files in the system
 * Web/page for using upload and download endpoints
