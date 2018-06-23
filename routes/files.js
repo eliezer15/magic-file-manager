@@ -5,7 +5,7 @@ const s3Service = require('../services/S3Service');
 const dynamoDbService = require('../services/DynamoDBService');
 const idGenerator = require('../services/IdGenerator');
 
-router.get('/api/files', async(req, res) => {
+router.get('/api/files', async (req, res) => {
   try {
     const files = await dynamoDbService.getAllFileItems();
     return res.json(files);
