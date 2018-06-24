@@ -1,5 +1,9 @@
 {
   "globalDependencies": {
     "uuid": "registry:dt/uuid#3.3.0+20160728152600"
+  },
+  "globalDevDependencies": {
+    "chai": "registry:dt/chai#3.4.0+20170217154556",
+    "sinon": "registry:dt/sinon#1.16.1+20161208163514"
   }
 }
