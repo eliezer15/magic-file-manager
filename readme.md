@@ -1,7 +1,11 @@
+
 ## Magic File Manager
 
+**This is a take-home assignment I completed back while interviewing for [Magic Leap](https://www.magicleap.com/en-us/)**
+
 ### Overview
-Simple web application to handle file uploads and downloads, with a RESTful Json API backend. App can be accessed at http://magic-file-manager.eliezerencarnacion.com
+
+Simple web application to handle file uploads and downloads, with a RESTful Json API backend.
 
 The application has the following endpoints:
 * **GET /** : returns the index.html page
